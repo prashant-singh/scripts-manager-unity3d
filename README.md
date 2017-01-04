@@ -1,7 +1,7 @@
 # scripts-manager-unity3d
 
 
-[Download](https://github.com/prashant-singh/scripts-manager-unity3d/releases/tag/0.1)
+[Download](https://github.com/prashant-singh/scripts-manager-unity3d/releases)
 
 
 Gives the list of scripts in the current scene with gameobject reference.
