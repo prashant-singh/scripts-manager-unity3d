@@ -1,8 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEditor;
 using System.Collections.Generic;
-using NUnit.Framework;
 
 
 public class MyScriptsManagerEditor : EditorWindow {
@@ -14,10 +13,7 @@ public class MyScriptsManagerEditor : EditorWindow {
 		GetWindow(typeof(MyScriptsManagerEditor)).minSize = new Vector2(250,200);
 		GetWindow(typeof(MyScriptsManagerEditor)).titleContent = new GUIContent("All Scripts v0.1");
 	}
-	public MyScriptsManagerEditor()
-	{
-		
-	}
+
 
 	GUIStyle styleHelpboxInner;
 	GUIStyle titleLabel,editorAddedButtonStyle,normalButtonStyle;
@@ -57,17 +53,34 @@ public class MyScriptsManagerEditor : EditorWindow {
 		objects = FindObjectsOfTypeAll( typeof( Component ) );
 		foreach( Component component in objects )
 		{
-			if(component.GetType().BaseType.ToString().Equals("UnityEngine.MonoBehaviour"))
+			if(component.GetType().BaseType.ToString().Equals("UnityEngine.MonoBehaviour") &&  IsInsideProject(component.GetType().Name))
 			{
-				if( !sets.ContainsKey( component.GetType() ) )
+				if( !sets.ContainsKey( component.GetType() ))
 				{
 					sets[ component.GetType() ] = new ArrayList();
 				}
 				( ( ArrayList )sets[ component.GetType() ] ).Add( component.gameObject );
 			}
 		}
-	
 	}
+
+	bool IsInsideProject(string fileName)
+	{
+		List<string> tempPaths = new List<string>();
+		string[] guids = AssetDatabase.FindAssets ("t:Script");
+		tempPaths = new List<string>();
+		foreach (var itemPath in guids) 
+		{
+			tempPaths.Add(AssetDatabase.GUIDToAssetPath(itemPath));
+		}
+
+		for (int count = 0; count < tempPaths.Count; count++) {
+			if(tempPaths[count].Contains(fileName))
+				return true;
+		}
+		return false;
+	}
+
 	List<string> pathOfScripts;
 	void OnGUI() 
 	{
@@ -130,9 +143,4 @@ public class MyScriptsManagerEditor : EditorWindow {
 		}
 		return "NaN";
 	}
-
-
-
-
-
 }
