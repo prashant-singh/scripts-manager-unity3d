@@ -3,20 +3,24 @@ using System.Collections;
 using UnityEditor;
 using System.Collections.Generic;
 
-
-public class MyScriptsManagerEditor : EditorWindow {
+namespace myEditorScripts
+{
+	public class MyScriptsManagerEditor : EditorWindow {
 	private Hashtable sets = new Hashtable();
+
 	[MenuItem("[Master_Tools]/Scripts Manager")]
 	static void Init() {
 
 		GetWindow(typeof(MyScriptsManagerEditor));
-		GetWindow(typeof(MyScriptsManagerEditor)).minSize = new Vector2(250,200);
-		GetWindow(typeof(MyScriptsManagerEditor)).titleContent = new GUIContent("All Scripts v0.1");
-	}
+		GetWindow(typeof(MyScriptsManagerEditor)).minSize = new Vector2(300,200);
+		GetWindow(typeof(MyScriptsManagerEditor)).titleContent = new GUIContent("All Scripts v0.3");
+		}
 
 
+
+	static Texture2D csScriptIcon,jsScriptIcon;
 	GUIStyle styleHelpboxInner;
-	GUIStyle titleLabel,editorAddedButtonStyle,normalButtonStyle;
+	GUIStyle titleLabel,normalButtonStyle,helpButtonStyle;
 	Texture editButtonIcon,saveButtonIcon;
 	void InitStyles()
 	{
@@ -26,13 +30,18 @@ public class MyScriptsManagerEditor : EditorWindow {
 
 		titleLabel = new GUIStyle();
 		titleLabel.fontSize = 10;
+			titleLabel.fontStyle = FontStyle.Bold;
 		titleLabel.normal.textColor = Color.white;
 		titleLabel.alignment = TextAnchor.UpperCenter;
 		titleLabel.fixedHeight = 15;
 
-		editorAddedButtonStyle = new GUIStyle(GUI.skin.button);
-		editorAddedButtonStyle.alignment = TextAnchor.MiddleLeft;
-		editorAddedButtonStyle.normal.textColor = Color.yellow;
+
+			helpButtonStyle = new GUIStyle(GUI.skin.button);
+			helpButtonStyle.fontSize = 10;
+			helpButtonStyle.fontStyle = FontStyle.Bold;
+			helpButtonStyle.normal.textColor = Color.white;
+			helpButtonStyle.alignment = TextAnchor.MiddleCenter;
+
 
 		normalButtonStyle = new GUIStyle(GUI.skin.button);
 		normalButtonStyle.alignment = TextAnchor.MiddleLeft;
@@ -44,13 +53,8 @@ public class MyScriptsManagerEditor : EditorWindow {
 		Object[] objects;
 
 		sets.Clear();
-		GUILayout.BeginHorizontal(styleHelpboxInner);
-		GUILayout.FlexibleSpace();
-		GUILayout.Label("All scripts used in current scene",titleLabel);
-		GUILayout.FlexibleSpace();
-		GUILayout.EndHorizontal();
+			objects = Resources.FindObjectsOfTypeAll( typeof( Component ) );
 
-		objects = FindObjectsOfTypeAll( typeof( Component ) );
 		foreach( Component component in objects )
 		{
 			if(component.GetType().BaseType.ToString().Equals("UnityEngine.MonoBehaviour") &&  IsInsideProject(component.GetType().Name))
@@ -61,6 +65,14 @@ public class MyScriptsManagerEditor : EditorWindow {
 				}
 				( ( ArrayList )sets[ component.GetType() ] ).Add( component.gameObject );
 			}
+		}
+		if(sets.Count>0)
+		{
+			hasAnyScript = true;
+		}
+		else
+		{
+			hasAnyScript = false;
 		}
 	}
 
@@ -80,23 +92,38 @@ public class MyScriptsManagerEditor : EditorWindow {
 		}
 		return false;
 	}
-
+	bool hasAnyScript = false;
 	List<string> pathOfScripts;
 	void OnGUI() 
 	{
 		InitStyles();
 		styleHelpboxInner = new GUIStyle("HelpBox");
 		styleHelpboxInner.padding = new RectOffset(6, 6, 6, 6);
-		UpdateList();
 		GUILayout.BeginVertical(styleHelpboxInner);
+		GUILayout.BeginHorizontal(styleHelpboxInner);
+		GUILayout.Label("All scripts used in current scene",titleLabel);
+			if(GUILayout.Button(new GUIContent("?", "Shoot me an email about the issue or suggestions"),helpButtonStyle,GUILayout.MaxWidth(20),GUILayout.MaxHeight(20)))
+			{
+				Application.OpenURL("https://github.com/prashant-singh");
+			}
+		GUILayout.EndHorizontal();
+		GUILayout.Space(5);
+		if(!hasAnyScript)
+		{
+			GUILayout.BeginHorizontal(styleHelpboxInner);
+			GUILayout.Label("No scripts found in this scene",titleLabel);
+			GUILayout.EndHorizontal();
+			GUILayout.EndVertical();
+			return;
+		}
+		
+		
 		string[] guids = AssetDatabase.FindAssets ("t:Script");
 		pathOfScripts = new List<string>();
 		foreach (var itemPath in guids) 
 		{
 			pathOfScripts.Add(AssetDatabase.GUIDToAssetPath(itemPath));
 		}
-
-	
 
 		foreach(System.Type type in sets.Keys)
 		{
@@ -108,6 +135,16 @@ public class MyScriptsManagerEditor : EditorWindow {
 				string[] tempArrString = getPathOfFile(type.Name).Split('.');
 				ext = tempArrString[1];
 			}
+
+			if(ext.Equals("cs"))
+			{
+					GUILayout.Box(new GUIContent(csScriptIcon, "CSharp Script"),GUILayout.MinWidth(20),GUILayout.MinHeight(20));
+			}
+			else
+			{
+					GUILayout.Box(new GUIContent(jsScriptIcon, "JavaScript"),GUILayout.MinWidth(20),GUILayout.MinHeight(20));
+			}
+
 			if(GUILayout.Button(type.Name+"."+ext,normalButtonStyle,GUILayout.MinWidth(200),GUILayout.MaxWidth(1000),GUILayout.Height(20)))
 			{
 				List<Object> arrayOfObjects;
@@ -118,7 +155,7 @@ public class MyScriptsManagerEditor : EditorWindow {
 				}
 				Selection.objects = arrayOfObjects.ToArray();
 			}
-			if(GUILayout.Button(editButtonIcon,normalButtonStyle,GUILayout.Width(30),GUILayout.Height(20)))
+				if(GUILayout.Button(new GUIContent(editButtonIcon, "Edit this script"),normalButtonStyle,GUILayout.Width(30),GUILayout.Height(20)))
 			{
 				if(!getPathOfFile(type.Name).Equals("NaN"))
 				{
@@ -128,8 +165,17 @@ public class MyScriptsManagerEditor : EditorWindow {
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
-	
+
+
+
 		GUILayout.EndVertical();
+	}
+
+	void OnFocus()
+	{
+		csScriptIcon = EditorGUIUtility.Load("icons/generated/cs script icon.asset") as Texture2D;
+		jsScriptIcon = EditorGUIUtility.Load("icons/generated/js script icon.asset") as Texture2D;
+		UpdateList();
 	}
 
 	string getPathOfFile(string tempName)
@@ -144,3 +190,5 @@ public class MyScriptsManagerEditor : EditorWindow {
 		return "NaN";
 	}
 }
+}
+
