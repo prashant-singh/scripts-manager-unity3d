@@ -53,7 +53,7 @@ namespace myEditorScripts
 		Object[] objects;
 
 		sets.Clear();
-			objects = Resources.FindObjectsOfTypeAll( typeof( Component ) );
+			objects = FindObjectsOfType( typeof( Component ) );
 
 		foreach( Component component in objects )
 		{
