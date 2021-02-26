@@ -5,4 +5,4 @@
 [![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg?style=popout)](https://github.com/prashant-singh/scripts-manager-unity3d/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/prashant-singh/scripts-manager-unity3d/all.svg)](https://github.com/prashant-singh/scripts-manager-unity3d/releases)
 
-![Preview](https://zippy.gfycat.com/PeriodicAlertAfricanrockpython.gif)
+![Preview](https://i.imgur.com/PswDMM2.gif)
